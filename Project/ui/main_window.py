@@ -37,8 +37,12 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.video_area)
 
         # Timeline
-        self.timeline = QSlider(Qt.Horizontal)
-        main_layout.addWidget(self.timeline)
+        timeline_layout = QHBoxLayout()
+        self.video_timeline = QSlider(Qt.Horizontal)
+        self.v_timeline_lablel = QLabel("00:00 / 00:00")
+        timeline_layout.addWidget(self.v_timeline_lablel)
+        timeline_layout.addWidget(self.v_timeline_lablel)
+        main_layout.addLayout(timeline_layout)
 
         # Horizontal layout
         control_layout = QHBoxLayout()
@@ -59,7 +63,7 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(control_layout)
 
 
-    # Video File Selection
+    # Video File Selection 
     def video_selection(self):
         
         fileName, _ = QFileDialog.getOpenFileName(
