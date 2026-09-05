@@ -1,0 +1,5 @@
+/virtualEnv
+/Project/Extra
+/Project/*/__pycache__
+.vscode/
+.env
