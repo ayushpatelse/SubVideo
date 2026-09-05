@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.video_timeline = QSlider(Qt.Horizontal)
         self.v_timeline_lablel = QLabel("00:00 / 00:00")
         timeline_layout.addWidget(self.v_timeline_lablel)
-        timeline_layout.addWidget(self.v_timeline_lablel)
+        timeline_layout.addWidget(self.video_timeline)
         main_layout.addLayout(timeline_layout)
 
         # Horizontal layout
