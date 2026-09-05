@@ -28,7 +28,9 @@ class VideoPlayer:
 
         # --- Video Timeline --- 
         self.ui.video_timeline.sliderMoved.connect(self.seek)
-        
+        self.original_mousePressEvent = self.ui.video_timeline.mousePressEvent
+        self.ui.video_timeline.mousePressEvent  = self.update_timeline_clicked  # Overiding the Slider Mouse Press event directly 
+
         # Output
         self.player.setVideoOutput(self.ui.video_area)
         self.player.setSource(QUrl.fromLocalFile(video_url))
@@ -61,5 +63,25 @@ class VideoPlayer:
             
         self.ui.v_timeline_lablel.setText(f"{pos_time} / {dus_time}")
 
+    def update_timeline_clicked(self,event):
+        """ Calculating the User Click Position"""
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            click_x = event.position().x() # get relative value of the slider
+            timeline_width = self.ui.video_timeline.width()
+            
+            percentage = click_x / timeline_width
+
+            slider_length = self.ui.video_timeline.maximum() - self.ui.video_timeline.minimum() 
+            curr_click_val = int(self.ui.video_timeline.minimum() + ( slider_length * percentage))
+
+            # snap to the new value
+            self.player.setPosition(curr_click_val)
+
+            # Accept the event so it stops propagating
+            event.accept()
+
+        # Using the original Slider method to handle timeline slide 
+        self.original_mousePressEvent(event)
             
         
