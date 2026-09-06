@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import ( QUrl, Slot,QTime, Qt
                             )
- 
+
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput
 
 class VideoPlayer:
@@ -31,6 +31,10 @@ class VideoPlayer:
         self.original_mousePressEvent = self.ui.video_timeline.mousePressEvent
         self.ui.video_timeline.mousePressEvent  = self.update_timeline_clicked  # Overiding the Slider Mouse Press event directly 
 
+        # --- Audio Volume ---
+        self.audio_output.setVolume(self.ui.volume_slider.value()/100)
+        self.ui.volume_slider.valueChanged.connect(self.change_volume)
+
         # Output
         self.player.setVideoOutput(self.ui.video_area)
         self.player.setSource(QUrl.fromLocalFile(video_url))
@@ -51,6 +55,7 @@ class VideoPlayer:
         self.ui.video_timeline.setValue(position)
         self.update_time_display(position,self.player.duration())
 
+    @Slot(int)
     def update_time_display(self,position,duration):
         """ Converting milliseconds to Human-readable format """
         pos_time = QTime(0,0,0,0).addMSecs(position).toString("mm:ss")
@@ -83,5 +88,12 @@ class VideoPlayer:
 
         # Using the original Slider method to handle timeline slide 
         self.original_mousePressEvent(event)
-            
+
+    @Slot(int)
+    def change_volume(self,value):
+        # Audio output value from 0.0 to 1.0 
+        volume_val = value / 100
+        self.audio_output.setVolume(volume_val)
+        
+        
         

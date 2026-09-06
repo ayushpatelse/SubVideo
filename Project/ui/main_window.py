@@ -8,12 +8,13 @@ from PySide6.QtWidgets import  (
     QHBoxLayout,
     QLabel,
     QFileDialog
-    
 )
+from  PySide6.QtGui import QIcon
 from player.video_player import VideoPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QSize,Qt
 
+INITIAL_VOLUME = 70
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -36,13 +37,20 @@ class MainWindow(QMainWindow):
         self.video_area = QVideoWidget()
         main_layout.addWidget(self.video_area)
 
-        # Timeline
+        # Video Timeline
         timeline_layout = QHBoxLayout()
         self.video_timeline = QSlider(Qt.Horizontal)
         self.v_timeline_lablel = QLabel("00:00 / 00:00")
         timeline_layout.addWidget(self.v_timeline_lablel)
         timeline_layout.addWidget(self.video_timeline)
         main_layout.addLayout(timeline_layout)
+
+        # Volume Slider
+        self.volume_slider = QSlider(Qt.Horizontal)
+        self.volume_slider.setRange(0,100)
+        self.volume_slider.setFixedWidth(100)
+        self.volume_slider.setValue(70)
+        
 
         # Horizontal layout
         control_layout = QHBoxLayout()
@@ -56,6 +64,8 @@ class MainWindow(QMainWindow):
         self.play_button = QPushButton("Play")
         self.pause_button = QPushButton("Pause")
 
+        # Adding Control Wigdets
+        control_layout.addWidget(self.volume_slider)
         control_layout.addWidget(self.open_button)
         control_layout.addWidget(self.play_button)
         control_layout.addWidget(self.pause_button)
