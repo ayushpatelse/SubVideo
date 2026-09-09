@@ -1,4 +1,4 @@
-
+# Import Library functions,classes ,etc
 from PySide6.QtWidgets import  (
     QMainWindow,
     QWidget,
@@ -10,9 +10,12 @@ from PySide6.QtWidgets import  (
     QFileDialog
 )
 from  PySide6.QtGui import QIcon
-from player.video_player import VideoPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QSize,Qt
+
+# Import Custom class,function, etc
+from player.video_player import VideoPlayer
+from subtitles.parser import SubtitleParser
 
 INITIAL_VOLUME = 70
 
@@ -51,7 +54,14 @@ class MainWindow(QMainWindow):
         self.volume_slider.setFixedWidth(100)
         self.volume_slider.setValue(70)
         
-
+        # Subtitle
+        self.subtitle_text = QLabel("Subtitles show here")
+        self.subtitle_button = QPushButton("Select Subtitles")
+        self.subtitle_button.setFixedWidth(90)
+        self.subtitle_button.setStyleSheet("QPushButton { font-size :10px }")
+        self.subtitle_button.clicked.connect(self.selection_subtitles)
+        self.subtitle_text.setMaximumHeight(50)
+        
         # Horizontal layout
         control_layout = QHBoxLayout()
 
@@ -66,10 +76,12 @@ class MainWindow(QMainWindow):
 
         # Adding Control Wigdets
         control_layout.addWidget(self.volume_slider)
+        control_layout.addWidget(self.subtitle_button)
         control_layout.addWidget(self.open_button)
         control_layout.addWidget(self.play_button)
         control_layout.addWidget(self.pause_button)
-
+        
+        main_layout.addWidget(self.subtitle_text)
         main_layout.addLayout(control_layout)
 
 
@@ -84,16 +96,24 @@ class MainWindow(QMainWindow):
         )
         
         if fileName:
-            print("File Path: %s" %fileName)
             self.video_player = VideoPlayer(self,video_url=fileName)
             self.video_player.player.play()
 
         else:
-            print("No Path selected")
-        
+            raise ValueError("No Path selected or found")
 
-        
+    # Subtitle selection
+    def selection_subtitles(self):
+        subtitleFile, _ = QFileDialog.getOpenFileName(
+            None,
+            self.tr("Open File"),
+            "C:/Users/ayush/Desktop/Python/DualSub/Project/Extra/samples",
+            self.tr("Subtitles Files ( *.srt )")
+        ) 
 
+        if subtitleFile :
+            p =  SubtitleParser(subtitleFile)
+            p.parse()
+            
         
-
         
