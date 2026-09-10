@@ -1,25 +1,23 @@
 
-from PySide6.QtWidgets import (
-    QMainWindow
-)
-from PySide6.QtCore import ( QUrl, Slot,QTime, Qt
-                            )
+from PySide6.QtCore import ( QUrl, Slot,QTime, Qt)
 
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput
 
 class VideoPlayer:
     """ Handles the Video Logic """
     def __init__(self,ui_instance,video_url):
-        print("Path",video_url,ui_instance)
         self.ui = ui_instance
+        self.subtitle_blocks = []
 
         # Initialize Media Player
         self.player = QMediaPlayer()
         self.audio_output = QAudioOutput()
         self.player.setAudioOutput(self.audio_output)
         self.player.positionChanged.connect(self.update_video_timeline)
+        self.player.positionChanged.connect(self.get_subtitle)
         self.player.durationChanged.connect(self.update_video_range)
 
+        
         # Connect UI 
 
         # --- Button --- 
@@ -44,10 +42,10 @@ class VideoPlayer:
         self.player.setPosition(mseconds)
 
     @Slot()
-    def update_video_range(self):
+    def update_video_range(self,duration):
         """ Set's Video Duration"""
         
-        self.ui.video_timeline.setRange(0,self.player.duration())
+        self.ui.video_timeline.setRange(0,duration)
 
     @Slot(int)
     def update_video_timeline(self,position):
@@ -55,7 +53,6 @@ class VideoPlayer:
         self.ui.video_timeline.setValue(position)
         self.update_time_display(position,self.player.duration())
 
-    @Slot(int)
     def update_time_display(self,position,duration):
         """ Converting milliseconds to Human-readable format """
         pos_time = QTime(0,0,0,0).addMSecs(position).toString("mm:ss")
@@ -95,5 +92,21 @@ class VideoPlayer:
         volume_val = value / 100
         self.audio_output.setVolume(volume_val)
         
+    def set_subtitle(self,data:list):
+        """ Assign subtitle block """
+        if data:
+            self.subtitle_blocks = data
+        else:
+            raise ValueError("Data list is empty:",data)
+
+    def get_subtitle(self,value):
+        """ Get the subtitle accordting to the timeline"""
         
-        
+        for sub in self.subtitle_blocks:
+            if sub.start_ms <= value <= sub.end_ms:
+                html_list = "\n".join(sub.text)
+                self.ui.subtitle_text.setText(html_list)
+                return 
+
+        self.ui.subtitle_text.clear()
+ 

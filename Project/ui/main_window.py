@@ -112,8 +112,13 @@ class MainWindow(QMainWindow):
         ) 
 
         if subtitleFile :
-            p =  SubtitleParser(subtitleFile)
-            p.parse()
+            subtitle_parser =  SubtitleParser(subtitleFile)
+            subtitle_block = subtitle_parser.parse()
+            if self.video_player.player and subtitle_block != []:
+                self.video_player.set_subtitle(subtitle_block)
+            else:
+                raise ValueError("Subtitle list is empty or media is not selected",subtitle_block)
+
             
         
         
