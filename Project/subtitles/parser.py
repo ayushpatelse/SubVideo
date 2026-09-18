@@ -19,7 +19,7 @@ class SubtitleParser:
     def parse(self):
         """ Parsing the .SRT file into SubtitleBlock """     
 
-        with open(self.file_path,"r") as file:
+        with open(self.file_path,"r",encoding="utf-8") as file:
             blocks = []
             block_text = []
 
