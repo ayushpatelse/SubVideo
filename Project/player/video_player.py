@@ -7,14 +7,15 @@ class VideoPlayer:
     """ Handles the Video Logic """
     def __init__(self,ui_instance,video_url):
         self.ui = ui_instance
-        self.subtitle_blocks = []
+        self.primary_subtitle_blocks = []
+        self.secondary_subtitle_blocks = []
 
         # Initialize Media Player
         self.player = QMediaPlayer()
         self.audio_output = QAudioOutput()
         self.player.setAudioOutput(self.audio_output)
         self.player.positionChanged.connect(self.update_video_timeline)
-        self.player.positionChanged.connect(self.get_subtitle)
+        self.player.positionChanged.connect(self.update_subtitle)
         self.player.durationChanged.connect(self.update_video_range)
 
         
@@ -92,21 +93,44 @@ class VideoPlayer:
         volume_val = value / 100
         self.audio_output.setVolume(volume_val)
         
-    def set_subtitle(self,data:list):
+    def set_subtitle(self,data:list,track):
         """ Assign subtitle block """
         if data:
-            self.subtitle_blocks = data
+            # Primary 
+            if track == 1:
+                self.primary_subtitle_blocks = data
+
+            # Secondary 
+            if track == 2 :
+                self.secondary_subtitle_blocks = data
+            
         else:
             raise ValueError("Data list is empty:",data)
 
-    def get_subtitle(self,value):
+    def get_subtitle(self,value,subtitle_blocks,label):
         """ Get the subtitle accordting to the timeline"""
         
-        for sub in self.subtitle_blocks:
+        for sub in subtitle_blocks:
             if sub.start_ms <= value <= sub.end_ms:
                 html_list = "\n".join(sub.text)
-                self.ui.subtitle_text.setText(html_list)
+                label.setText(html_list)
+                print(html_list)
                 return 
 
-        self.ui.subtitle_text.clear()
- 
+        label.clear()
+
+    def update_subtitle(self,value):
+
+        if self.primary_subtitle_blocks:
+            self.get_subtitle(
+                value,
+                self.primary_subtitle_blocks,
+                self.ui.primary_subtitle_text
+            )
+
+        if self.secondary_subtitle_blocks:
+            self.get_subtitle(
+                value,
+                self.secondary_subtitle_blocks,
+                self.ui.secondary_subtitle_text
+            )

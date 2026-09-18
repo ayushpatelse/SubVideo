@@ -18,6 +18,9 @@ from player.video_player import VideoPlayer
 from subtitles.parser import SubtitleParser
 
 INITIAL_VOLUME = 70
+PRIMARY_SUBTITLE = 1
+SECONDARY_SUBTITLE = 2
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -54,14 +57,24 @@ class MainWindow(QMainWindow):
         self.volume_slider.setFixedWidth(100)
         self.volume_slider.setValue(70)
         
-        # Subtitle
-        self.subtitle_text = QLabel("Subtitles show here")
+        # Subtitles
+        subtitle_layout = QHBoxLayout()
         self.subtitle_button = QPushButton("Select Subtitles")
         self.subtitle_button.setFixedWidth(90)
         self.subtitle_button.setStyleSheet("QPushButton { font-size :10px }")
         self.subtitle_button.clicked.connect(self.selection_subtitles)
-        self.subtitle_text.setMaximumHeight(50)
-        
+
+        self.primary_subtitle_text = QLabel("Subtitles show here")
+        self.primary_subtitle_text.setMaximumHeight(50)
+        self.primary_subtitle_text.setStyleSheet("background-color: rbga(0,0,0,0); qproperty-alignment: AlignCenter;")
+
+        self.secondary_subtitle_text = QLabel("Subtitles show here")
+        self.secondary_subtitle_text.setMaximumHeight(50)
+        self.secondary_subtitle_text.setStyleSheet("background-color: rbga(0,0,0,0) ; qproperty-alignment: AlignCenter;")
+
+        subtitle_layout.addWidget(self.primary_subtitle_text)
+        subtitle_layout.addWidget(self.secondary_subtitle_text)
+
         # Horizontal layout
         control_layout = QHBoxLayout()
 
@@ -81,7 +94,7 @@ class MainWindow(QMainWindow):
         control_layout.addWidget(self.play_button)
         control_layout.addWidget(self.pause_button)
         
-        main_layout.addWidget(self.subtitle_text)
+        main_layout.addLayout(subtitle_layout)
         main_layout.addLayout(control_layout)
 
 
@@ -115,7 +128,14 @@ class MainWindow(QMainWindow):
             subtitle_parser =  SubtitleParser(subtitleFile)
             subtitle_block = subtitle_parser.parse()
             if self.video_player.player and subtitle_block != []:
-                self.video_player.set_subtitle(subtitle_block)
+
+                if not self.video_player.primary_subtitle_blocks  : 
+                    self.video_player.set_subtitle(subtitle_block,track=PRIMARY_SUBTITLE)
+                    print("! Primary Subtitle Set")
+                else: 
+                    self.video_player.set_subtitle(subtitle_block,track=SECONDARY_SUBTITLE)
+                    print("! Secondary Subtitle Set")
+                
             else:
                 raise ValueError("Subtitle list is empty or media is not selected",subtitle_block)
 
