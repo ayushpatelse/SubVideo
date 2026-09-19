@@ -2,14 +2,15 @@
 from PySide6.QtCore import ( QUrl, Slot,QTime, Qt)
 
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput
+from subtitles.tracker import SubtitleTrack
 
 class VideoPlayer:
     """ Handles the Video Logic """
     def __init__(self,ui_instance,video_url):
         self.ui = ui_instance
-        self.primary_subtitle_blocks = []
-        self.secondary_subtitle_blocks = []
-
+        self.primary_subtitle = SubtitleTrack("Primary Subtitle",[])
+        self.secondary_subtitle = SubtitleTrack("Secondary Subtitle",[])
+        
         # Initialize Media Player
         self.player = QMediaPlayer()
         self.audio_output = QAudioOutput()
@@ -98,11 +99,11 @@ class VideoPlayer:
         if data:
             # Primary 
             if track == 1:
-                self.primary_subtitle_blocks = data
+                self.primary_subtitle.blocks = data
 
             # Secondary 
             if track == 2 :
-                self.secondary_subtitle_blocks = data
+                self.secondary_subtitle.blocks = data
             
         else:
             raise ValueError("Data list is empty:",data)
@@ -120,17 +121,17 @@ class VideoPlayer:
         label.clear()
 
     def update_subtitle(self,value):
-
-        if self.primary_subtitle_blocks:
+        """ Updates the primary and secondary subtitle UI text based on the given value. """
+        if self.primary_subtitle.blocks:
             self.get_subtitle(
                 value,
-                self.primary_subtitle_blocks,
+                self.primary_subtitle.blocks,
                 self.ui.primary_subtitle_text
             )
 
-        if self.secondary_subtitle_blocks:
+        if self.secondary_subtitle.blocks:
             self.get_subtitle(
                 value,
-                self.secondary_subtitle_blocks,
+                self.secondary_subtitle.blocks,
                 self.ui.secondary_subtitle_text
             )
