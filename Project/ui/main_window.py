@@ -58,19 +58,40 @@ class MainWindow(QMainWindow):
         
         # --- Subtitle ---
         subtitle_layout = QHBoxLayout()
+        primary_subtitle_box = QVBoxLayout()
+        secondary_subtitle_box = QVBoxLayout()
         self.subtitle_button = QPushButton("Select Subtitles")
         self.subtitle_button.setFixedWidth(90)
         self.subtitle_button.setStyleSheet("QPushButton { font-size :10px }")
         self.subtitle_button.clicked.connect(self.selection_subtitles)
 
         # Subtitle Offset Logic
-        offset_layout = QHBoxLayout()
-        self.offset_value_lablel = QLabel("0")
-        self.minus_button = QPushButton("-") 
-        self.plus_button = QPushButton("+")
-        offset_layout.addWidget(self.minus_button)
-        offset_layout.addWidget(self.offset_value_lablel)
-        offset_layout.addWidget(self.plus_button)
+        # Primary Offset
+        primary_offset_layout = QHBoxLayout()
+        self.primary_offset_value_lablel = QLabel("0s")
+        self.primary_offset_value_lablel.setFixedWidth(50)
+        self.primary_offset_value_lablel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.primary_minus_button = QPushButton("-") 
+        self.primary_minus_button.setFixedWidth(50) 
+        self.primary_plus_button = QPushButton("+")
+        self.primary_plus_button.setFixedWidth(50) 
+        primary_offset_layout.addWidget(self.primary_minus_button)
+        primary_offset_layout.addWidget(self.primary_offset_value_lablel)
+        primary_offset_layout.addWidget(self.primary_plus_button)
+
+        # Primary Offset
+        secondary_offset_layout = QHBoxLayout()
+        self.secondary_offset_value_lablel = QLabel("0s")
+        self.secondary_offset_value_lablel.setFixedWidth(50)
+        self.secondary_offset_value_lablel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.secondary_minus_button = QPushButton("-") 
+        self.secondary_minus_button.setFixedWidth(50) 
+        self.secondary_plus_button = QPushButton("+")
+        self.secondary_plus_button.setFixedWidth(50) 
+        secondary_offset_layout.addWidget(self.secondary_minus_button)
+        secondary_offset_layout.addWidget(self.secondary_offset_value_lablel)
+        secondary_offset_layout.addWidget(self.secondary_plus_button)
 
         self.primary_subtitle_text = QLabel("Subtitles show here")
         self.primary_subtitle_text.setMaximumHeight(50)
@@ -80,8 +101,12 @@ class MainWindow(QMainWindow):
         self.secondary_subtitle_text.setMaximumHeight(50)
         self.secondary_subtitle_text.setStyleSheet("background-color: rbga(0,0,0,0) ; qproperty-alignment: AlignCenter;")
         
-        subtitle_layout.addWidget(self.primary_subtitle_text)
-        subtitle_layout.addWidget(self.secondary_subtitle_text)
+        primary_subtitle_box.addWidget(self.primary_subtitle_text)
+        primary_subtitle_box.addLayout(primary_offset_layout)
+        secondary_subtitle_box.addWidget(self.secondary_subtitle_text)
+        secondary_subtitle_box.addLayout(secondary_offset_layout)
+        subtitle_layout.addLayout(primary_subtitle_box)
+        subtitle_layout.addLayout(secondary_subtitle_box)
 
         # Horizontal layout
         control_layout = QHBoxLayout()
