@@ -68,29 +68,28 @@ class MainWindow(QMainWindow):
         # Subtitle Offset Logic
         # Primary Offset
         primary_offset_layout = QHBoxLayout()
-        self.primary_offset_value_lablel = QLabel("0s")
-        self.primary_offset_value_lablel.setFixedWidth(50)
-        self.primary_offset_value_lablel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
+        self.primary_offset_value_label = QLabel("0s")
+        self.primary_offset_value_label.setFixedWidth(50)
+        self.primary_offset_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.primary_minus_button = QPushButton("-") 
         self.primary_minus_button.setFixedWidth(50) 
         self.primary_plus_button = QPushButton("+")
         self.primary_plus_button.setFixedWidth(50) 
         primary_offset_layout.addWidget(self.primary_minus_button)
-        primary_offset_layout.addWidget(self.primary_offset_value_lablel)
+        primary_offset_layout.addWidget(self.primary_offset_value_label)
         primary_offset_layout.addWidget(self.primary_plus_button)
 
         # Primary Offset
         secondary_offset_layout = QHBoxLayout()
-        self.secondary_offset_value_lablel = QLabel("0s")
-        self.secondary_offset_value_lablel.setFixedWidth(50)
-        self.secondary_offset_value_lablel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.secondary_offset_value_label = QLabel("0s")
+        self.secondary_offset_value_label.setFixedWidth(50)
+        self.secondary_offset_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.secondary_minus_button = QPushButton("-") 
         self.secondary_minus_button.setFixedWidth(50) 
         self.secondary_plus_button = QPushButton("+")
         self.secondary_plus_button.setFixedWidth(50) 
         secondary_offset_layout.addWidget(self.secondary_minus_button)
-        secondary_offset_layout.addWidget(self.secondary_offset_value_lablel)
+        secondary_offset_layout.addWidget(self.secondary_offset_value_label)
         secondary_offset_layout.addWidget(self.secondary_plus_button)
 
         self.primary_subtitle_text = QLabel("Subtitles show here")

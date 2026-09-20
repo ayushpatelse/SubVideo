@@ -4,6 +4,8 @@ from PySide6.QtCore import ( QUrl, Slot,QTime, Qt)
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput
 from subtitles.tracker import SubtitleTrack
 
+OFFSET_VALUE = 250
+
 class VideoPlayer:
     """ Handles the Video Logic """
     def __init__(self,ui_instance,video_url):
@@ -18,7 +20,6 @@ class VideoPlayer:
         self.player.positionChanged.connect(self.update_video_timeline)
         self.player.positionChanged.connect(self.update_subtitle)
         self.player.durationChanged.connect(self.update_video_range)
-
         
         # Connect UI 
 
@@ -34,6 +35,28 @@ class VideoPlayer:
         # --- Audio Volume ---
         self.audio_output.setVolume(self.ui.volume_slider.value()/100)
         self.ui.volume_slider.valueChanged.connect(self.change_volume)
+
+        # --- Subtitle Offset ---
+        self.ui.primary_plus_button.clicked.connect(
+            lambda : self.update_offset_subtitle(
+                self.primary_subtitle,
+                self.ui.primary_offset_value_label,
+                OFFSET_VALUE))
+        self.ui.primary_minus_button.clicked.connect(
+            lambda : self.update_offset_subtitle(
+                self.primary_subtitle,
+                self.ui.primary_offset_value_label,
+                -OFFSET_VALUE))
+        self.ui.secondary_plus_button.clicked.connect(
+            lambda : self.update_offset_subtitle(
+                self.secondary_subtitle,
+                self.ui.secondary_offset_value_label,
+                OFFSET_VALUE))
+        self.ui.secondary_minus_button.clicked.connect(
+            lambda : self.update_offset_subtitle(
+                self.secondary_subtitle,
+                self.ui.secondary_offset_value_label,
+                -OFFSET_VALUE))
 
         # Output
         self.player.setVideoOutput(self.ui.video_area)
@@ -90,7 +113,7 @@ class VideoPlayer:
 
     @Slot(int)
     def change_volume(self,value):
-        # Audio output value from 0.0 to 1.0 
+        """ Audio output value from 0.0 to 1.0 """ 
         volume_val = value / 100
         self.audio_output.setVolume(volume_val)
         
@@ -108,14 +131,15 @@ class VideoPlayer:
         else:
             raise ValueError("Data list is empty:",data)
 
-    def get_subtitle(self,value,subtitle_blocks,label):
+    def get_subtitle(self,value,subtitles,label,offset):
         """ Get the subtitle accordting to the timeline"""
         
-        for sub in subtitle_blocks:
-            if sub.start_ms <= value <= sub.end_ms:
+        value += offset
+
+        for sub in subtitles:
+            if ( sub.start_ms + offset <= value <= sub.end_ms + offset ):
                 html_list = "\n".join(sub.text)
                 label.setText(html_list)
-                print(html_list)
                 return 
 
         label.clear()
@@ -126,12 +150,22 @@ class VideoPlayer:
             self.get_subtitle(
                 value,
                 self.primary_subtitle.blocks,
-                self.ui.primary_subtitle_text
+                self.ui.primary_subtitle_text,
+                self.primary_subtitle.offset_ms,
             )
 
         if self.secondary_subtitle.blocks:
             self.get_subtitle(
                 value,
-                self.secondary_subtitle.blocks,
-                self.ui.secondary_subtitle_text
+                self.secondary_subtitle,
+                self.ui.secondary_subtitle_text,
+                self.secondary_subtitle.offset_ms,
             )
+
+    def update_offset_subtitle(self,subtitle,label,value):
+        """ Update the offset value of the subtitle """
+
+        subtitle.offset_ms += value
+        label.setText(f"{subtitle.offset_ms / 1000:+.2f}s")
+        self.update_subtitle(self.player.position())
+        
