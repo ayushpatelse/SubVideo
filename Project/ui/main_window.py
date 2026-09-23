@@ -11,7 +11,7 @@ from PySide6.QtWidgets import  (
 )
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import Qt
-
+import os
 # Import Custom class,function, etc
 from player.video_player import VideoPlayer
 from subtitles.parser import SubtitleParser
@@ -67,6 +67,9 @@ class MainWindow(QMainWindow):
 
         # Subtitle Offset Logic
         # Primary Offset
+        self.primary_subtitle_name = QLabel("pn")
+        self.primary_subtitle_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.primary_subtitle_name.setStyleSheet("QLabel {font-size : 10px; max-height : 15px}")
         primary_offset_layout = QHBoxLayout()
         self.primary_offset_value_label = QLabel("0s")
         self.primary_offset_value_label.setFixedWidth(50)
@@ -75,11 +78,15 @@ class MainWindow(QMainWindow):
         self.primary_minus_button.setFixedWidth(50) 
         self.primary_plus_button = QPushButton("+")
         self.primary_plus_button.setFixedWidth(50) 
+
         primary_offset_layout.addWidget(self.primary_minus_button)
         primary_offset_layout.addWidget(self.primary_offset_value_label)
         primary_offset_layout.addWidget(self.primary_plus_button)
 
         # Primary Offset
+        self.secondary_subtitle_name = QLabel("pn")
+        self.secondary_subtitle_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.secondary_subtitle_name.setStyleSheet("QLabel {font-size : 10px; max-height : 15px}")
         secondary_offset_layout = QHBoxLayout()
         self.secondary_offset_value_label = QLabel("0s")
         self.secondary_offset_value_label.setFixedWidth(50)
@@ -88,6 +95,7 @@ class MainWindow(QMainWindow):
         self.secondary_minus_button.setFixedWidth(50) 
         self.secondary_plus_button = QPushButton("+")
         self.secondary_plus_button.setFixedWidth(50) 
+
         secondary_offset_layout.addWidget(self.secondary_minus_button)
         secondary_offset_layout.addWidget(self.secondary_offset_value_label)
         secondary_offset_layout.addWidget(self.secondary_plus_button)
@@ -99,11 +107,15 @@ class MainWindow(QMainWindow):
         self.secondary_subtitle_text = QLabel("Subtitles show here")
         self.secondary_subtitle_text.setMaximumHeight(50)
         self.secondary_subtitle_text.setStyleSheet("background-color: rbga(0,0,0,0) ; qproperty-alignment: AlignCenter;")
-        
+
+        primary_subtitle_box.addWidget(self.primary_subtitle_name)
         primary_subtitle_box.addWidget(self.primary_subtitle_text)
         primary_subtitle_box.addLayout(primary_offset_layout)
+
+        secondary_subtitle_box.addWidget(self.secondary_subtitle_name)
         secondary_subtitle_box.addWidget(self.secondary_subtitle_text)
         secondary_subtitle_box.addLayout(secondary_offset_layout)
+
         subtitle_layout.addLayout(primary_subtitle_box)
         subtitle_layout.addLayout(secondary_subtitle_box)
 
@@ -158,14 +170,16 @@ class MainWindow(QMainWindow):
 
         if subtitleFile :
             subtitle_parser =  SubtitleParser(subtitleFile)
+            file_name = os.path.basename(subtitleFile)
             subtitle_block = subtitle_parser.parse()
+            print(file_name)
             if self.video_player.player and subtitle_block != []:
 
                 if not self.video_player.primary_subtitle.blocks  : 
-                    self.video_player.set_subtitle(subtitle_block,track=PRIMARY_SUBTITLE)
+                    self.video_player.set_subtitle(data=subtitle_block,fileName=file_name,track=PRIMARY_SUBTITLE)
                     print("! Primary Subtitle Set")
                 else: 
-                    self.video_player.set_subtitle(subtitle_block,track=SECONDARY_SUBTITLE)
+                    self.video_player.set_subtitle(data=subtitle_block,fileName=file_name,track=SECONDARY_SUBTITLE)
                     print("! Secondary Subtitle Set")
                 
             else:

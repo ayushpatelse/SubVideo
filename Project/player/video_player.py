@@ -117,27 +117,32 @@ class VideoPlayer:
         volume_val = value / 100
         self.audio_output.setVolume(volume_val)
         
-    def set_subtitle(self,data:list,track):
+    def set_subtitle(self,data:list,fileName,track):
         """ Assign subtitle block """
         if data:
             # Primary 
             if track == 1:
                 self.primary_subtitle.blocks = data
-
+                self.primary_subtitle.name = fileName
+                self.ui.primary_subtitle_name.setText(self.primary_subtitle.name)
+                self.primary_subtitle.offset_ms = 0
+                self.update_offset_subtitle(self.primary_subtitle,self.ui.primary_offset_value_label,0)
             # Secondary 
-            if track == 2 :
+            elif track == 2 :
                 self.secondary_subtitle.blocks = data
-            
+                self.secondary_subtitle.name = fileName
+                self.ui.secondary_subtitle_name.setText(self.secondary_subtitle.name)
+                self.secondary_subtitle.offset_ms = 0
+                self.update_offset_subtitle(self.secondary_subtitle,self.ui.secondary_offset_value_label,0)
+                
         else:
             raise ValueError("Data list is empty:",data)
 
-    def get_subtitle(self,value,subtitles,label,offset):
+    def get_subtitle(self,value,subtitles,label,offset_ms):
         """ Get the subtitle accordting to the timeline"""
         
-        value += offset
-
         for sub in subtitles:
-            if ( sub.start_ms + offset <= value <= sub.end_ms + offset ):
+            if ( sub.start_ms + offset_ms <= value <= sub.end_ms + offset_ms ):
                 html_list = "\n".join(sub.text)
                 label.setText(html_list)
                 return 
@@ -157,7 +162,7 @@ class VideoPlayer:
         if self.secondary_subtitle.blocks:
             self.get_subtitle(
                 value,
-                self.secondary_subtitle,
+                self.secondary_subtitle.blocks,
                 self.ui.secondary_subtitle_text,
                 self.secondary_subtitle.offset_ms,
             )
