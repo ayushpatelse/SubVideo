@@ -58,6 +58,14 @@ class VideoPlayer:
                 self.ui.secondary_offset_value_label,
                 -OFFSET_VALUE))
 
+        # --- Subtitle Remove ---
+        self.ui.primary_subtitle_remove.clicked.connect(
+            lambda: self.remove_subtitle(track=1)
+        )
+        self.ui.secondary_subtitle_remove.clicked.connect(
+            lambda: self.remove_subtitle(track=2)
+        )
+
         # Output
         self.player.setVideoOutput(self.ui.video_area)
         self.player.setSource(QUrl.fromLocalFile(video_url))
@@ -127,6 +135,7 @@ class VideoPlayer:
                 self.ui.primary_subtitle_name.setText(self.primary_subtitle.name)
                 self.primary_subtitle.offset_ms = 0
                 self.update_offset_subtitle(self.primary_subtitle,self.ui.primary_offset_value_label,0)
+                print(self.primary_subtitle.name,self.primary_subtitle.offset_ms,self.primary_subtitle.blocks is not None)
             # Secondary 
             elif track == 2 :
                 self.secondary_subtitle.blocks = data
@@ -167,6 +176,26 @@ class VideoPlayer:
                 self.secondary_subtitle.offset_ms,
             )
 
+    def remove_subtitle(self,track):
+        """ Remove the subtitles from track """
+        if track == 1 :
+            self.primary_subtitle.blocks = []
+            self.primary_subtitle.offset_ms = 0
+            self.primary_subtitle.name = "Primary Subtitle"
+            self.ui.primary_subtitle_text.clear()
+            self.ui.primary_subtitle_name.setText("No Subtitle")
+            self.ui.primary_offset_value_label.setText("+0.00s")
+
+        elif track == 2:
+            self.secondary_subtitle.blocks = []
+            self.secondary_subtitle.offset_ms = 0
+            self.secondary_subtitle.name = "Secondary Subtitle"
+            self.ui.secondary_subtitle_text.clear()
+            self.ui.secondary_subtitle_name.setText("No Subtitle")
+            self.ui.secondary_offset_value_label.setText("+0.00s")
+        else:
+            raise ValueError("No track found on ", track)
+        
     def update_offset_subtitle(self,subtitle,label,value):
         """ Update the offset value of the subtitle """
 

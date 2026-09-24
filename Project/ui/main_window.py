@@ -60,59 +60,75 @@ class MainWindow(QMainWindow):
         subtitle_layout = QHBoxLayout()
         primary_subtitle_box = QVBoxLayout()
         secondary_subtitle_box = QVBoxLayout()
-        self.subtitle_button = QPushButton("Select Subtitles")
-        self.subtitle_button.setFixedWidth(90)
-        self.subtitle_button.setStyleSheet("QPushButton { font-size :10px }")
-        self.subtitle_button.clicked.connect(self.selection_subtitles)
+        
 
         # Subtitle Offset Logic
         # Primary Offset
-        self.primary_subtitle_name = QLabel("pn")
-        self.primary_subtitle_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.primary_subtitle_name = QLabel("No Subtitle")
         self.primary_subtitle_name.setStyleSheet("QLabel {font-size : 10px; max-height : 15px}")
         primary_offset_layout = QHBoxLayout()
         self.primary_offset_value_label = QLabel("0s")
         self.primary_offset_value_label.setFixedWidth(50)
         self.primary_offset_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.primary_subtitle_change = QPushButton("Change / Load")
+        self.primary_subtitle_change.setStyleSheet("QPushButton {font-size : 10px; max-height : 15px}")
+        self.primary_subtitle_change.clicked.connect(
+            lambda: self.selection_subtitles(PRIMARY_SUBTITLE))
+        self.primary_subtitle_remove = QPushButton("Remove")
+        self.primary_subtitle_remove.setStyleSheet("QPushButton {font-size : 10px; max-height : 15px}")
         self.primary_minus_button = QPushButton("-") 
         self.primary_minus_button.setFixedWidth(50) 
         self.primary_plus_button = QPushButton("+")
         self.primary_plus_button.setFixedWidth(50) 
+        primary_function = QHBoxLayout()
 
+        primary_function.addWidget(self.primary_subtitle_name,alignment=Qt.AlignmentFlag.AlignLeft)
+        primary_function.addWidget(self.primary_subtitle_change,alignment=Qt.AlignmentFlag.AlignRight)
+        primary_function.addWidget(self.primary_subtitle_remove,alignment=Qt.AlignmentFlag.AlignRight)
         primary_offset_layout.addWidget(self.primary_minus_button)
         primary_offset_layout.addWidget(self.primary_offset_value_label)
         primary_offset_layout.addWidget(self.primary_plus_button)
 
         # Primary Offset
-        self.secondary_subtitle_name = QLabel("pn")
-        self.secondary_subtitle_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.secondary_subtitle_name = QLabel("No Subtitle")
+        self.secondary_subtitle_name.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.secondary_subtitle_name.setStyleSheet("QLabel {font-size : 10px; max-height : 15px}")
         secondary_offset_layout = QHBoxLayout()
         self.secondary_offset_value_label = QLabel("0s")
         self.secondary_offset_value_label.setFixedWidth(50)
         self.secondary_offset_value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.secondary_subtitle_change = QPushButton("Change / Load")
+        self.secondary_subtitle_change.setStyleSheet("QPushButton {font-size : 10px; max-height : 15px}")
+        self.secondary_subtitle_change.clicked.connect(
+            lambda: self.selection_subtitles(SECONDARY_SUBTITLE))
+        self.secondary_subtitle_remove = QPushButton("Remove")
+        self.secondary_subtitle_remove.setStyleSheet("QPushButton {font-size : 10px; max-height : 15px}")
         self.secondary_minus_button = QPushButton("-") 
         self.secondary_minus_button.setFixedWidth(50) 
         self.secondary_plus_button = QPushButton("+")
         self.secondary_plus_button.setFixedWidth(50) 
+        secondary_function = QHBoxLayout()
 
+        secondary_function.addWidget(self.secondary_subtitle_name,alignment=Qt.AlignmentFlag.AlignLeft)
+        secondary_function.addWidget(self.secondary_subtitle_change,alignment=Qt.AlignmentFlag.AlignRight)
+        secondary_function.addWidget(self.secondary_subtitle_remove,alignment=Qt.AlignmentFlag.AlignRight)
         secondary_offset_layout.addWidget(self.secondary_minus_button)
         secondary_offset_layout.addWidget(self.secondary_offset_value_label)
         secondary_offset_layout.addWidget(self.secondary_plus_button)
 
-        self.primary_subtitle_text = QLabel("Subtitles show here")
+        self.primary_subtitle_text = QLabel("")
         self.primary_subtitle_text.setMaximumHeight(50)
         self.primary_subtitle_text.setStyleSheet("background-color: rbga(0,0,0,0); qproperty-alignment: AlignCenter;")
 
-        self.secondary_subtitle_text = QLabel("Subtitles show here")
+        self.secondary_subtitle_text = QLabel("")
         self.secondary_subtitle_text.setMaximumHeight(50)
         self.secondary_subtitle_text.setStyleSheet("background-color: rbga(0,0,0,0) ; qproperty-alignment: AlignCenter;")
 
-        primary_subtitle_box.addWidget(self.primary_subtitle_name)
+        primary_subtitle_box.addLayout(primary_function)
         primary_subtitle_box.addWidget(self.primary_subtitle_text)
         primary_subtitle_box.addLayout(primary_offset_layout)
 
-        secondary_subtitle_box.addWidget(self.secondary_subtitle_name)
+        secondary_subtitle_box.addLayout(secondary_function)
         secondary_subtitle_box.addWidget(self.secondary_subtitle_text)
         secondary_subtitle_box.addLayout(secondary_offset_layout)
 
@@ -133,7 +149,6 @@ class MainWindow(QMainWindow):
 
         # Adding Control Wigdets
         control_layout.addWidget(self.volume_slider)
-        control_layout.addWidget(self.subtitle_button)
         control_layout.addWidget(self.open_button)
         control_layout.addWidget(self.play_button)
         control_layout.addWidget(self.pause_button)
@@ -160,28 +175,21 @@ class MainWindow(QMainWindow):
             raise ValueError("No Path selected or found")
 
     # Subtitle selection
-    def selection_subtitles(self):
+    def selection_subtitles(self,s_track):
         subtitleFile, _ = QFileDialog.getOpenFileName(
             None,
             self.tr("Open File"),
             "C:/Users/ayush/Desktop/Python/DualSub/Project/Extra/samples",
             self.tr("Subtitles Files ( *.srt )")
-        ) 
+) 
 
         if subtitleFile :
             subtitle_parser =  SubtitleParser(subtitleFile)
             file_name = os.path.basename(subtitleFile)
             subtitle_block = subtitle_parser.parse()
-            print(file_name)
+            
             if self.video_player.player and subtitle_block != []:
-
-                if not self.video_player.primary_subtitle.blocks  : 
-                    self.video_player.set_subtitle(data=subtitle_block,fileName=file_name,track=PRIMARY_SUBTITLE)
-                    print("! Primary Subtitle Set")
-                else: 
-                    self.video_player.set_subtitle(data=subtitle_block,fileName=file_name,track=SECONDARY_SUBTITLE)
-                    print("! Secondary Subtitle Set")
-                
+                self.video_player.set_subtitle(data=subtitle_block,fileName=file_name,track=s_track)
             else:
                 raise ValueError("Subtitle list is empty or media is not selected",subtitle_block)
 
