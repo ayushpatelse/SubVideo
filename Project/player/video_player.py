@@ -3,6 +3,7 @@ from PySide6.QtCore import ( QUrl, Slot,QTime, Qt)
 
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput
 from subtitles.tracker import SubtitleTrack
+from subtitles.embedded import EmbeddedSubtitleDetector
 
 OFFSET_VALUE = 250
 
@@ -135,7 +136,6 @@ class VideoPlayer:
                 self.ui.primary_subtitle_name.setText(self.primary_subtitle.name)
                 self.primary_subtitle.offset_ms = 0
                 self.update_offset_subtitle(self.primary_subtitle,self.ui.primary_offset_value_label,0)
-                print(self.primary_subtitle.name,self.primary_subtitle.offset_ms,self.primary_subtitle.blocks is not None)
             # Secondary 
             elif track == 2 :
                 self.secondary_subtitle.blocks = data
