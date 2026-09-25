@@ -70,12 +70,17 @@ class SubtitleParser:
 
         if len(data) < 3 :
             raise ValueError("Subtitle block is missing index, timestamp, or text") 
-        
+
         time_stamps =  self.timestamp_start_end_ms(data[1])
+
+        index_match = re.search(r'\d+',data[0]).group()
+        
+        if not index_match:
+            raise ValueError("Subtitle Index Not Found")
         
         # Creating Dataclass 
         return SubtitleBlock(
-            index = int(re.search(r'\d+',data[0]).group()),
+            index = int(index_match),
             text = data[2:],
             start_ms =  time_stamps[0],
             end_ms = time_stamps[1]

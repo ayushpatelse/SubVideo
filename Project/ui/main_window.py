@@ -186,8 +186,12 @@ class MainWindow(QMainWindow):
         if subtitleFile :
             subtitle_parser =  SubtitleParser(subtitleFile)
             file_name = os.path.basename(subtitleFile)
-            subtitle_block = subtitle_parser.parse()
-            
+            try :
+                subtitle_block = subtitle_parser.parse()
+            except ValueError as error: 
+                print(f"Could not load subtitle: {error}")
+                return
+
             if self.video_player.player and subtitle_block != []:
                 self.video_player.set_subtitle(data=subtitle_block,fileName=file_name,track=s_track)
             else:
