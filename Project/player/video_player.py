@@ -3,16 +3,20 @@ from PySide6.QtCore import ( QUrl, Slot,QTime, Qt)
 
 from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput
 from subtitles.tracker import SubtitleTrack
-from subtitles.embedded import EmbeddedSubtitleDetector
+from subtitles.embedded import EmbeddedSubtitleDetector,EmbeddedSubtitleExtracter
 
 OFFSET_VALUE = 250
+PRIMARY_SUBTITLE = 1
+SECONDARY_SUBTITLE = 2
 
 class VideoPlayer:
     """ Handles the Video Logic """
     def __init__(self,ui_instance,video_url):
         self.ui = ui_instance
+        self.video_url = video_url
         self.primary_subtitle = SubtitleTrack("Primary Subtitle",[])
         self.secondary_subtitle = SubtitleTrack("Secondary Subtitle",[])
+        self.embedded_subtitles = None
         
         # Initialize Media Player
         self.player = QMediaPlayer()
@@ -61,15 +65,24 @@ class VideoPlayer:
 
         # --- Subtitle Remove ---
         self.ui.primary_subtitle_remove.clicked.connect(
-            lambda: self.remove_subtitle(track=1)
+            lambda: self.remove_subtitle(track=PRIMARY_SUBTITLE)
         )
         self.ui.secondary_subtitle_remove.clicked.connect(
-            lambda: self.remove_subtitle(track=2)
+            lambda: self.remove_subtitle(track=SECONDARY_SUBTITLE)
+        )
+
+        # --- Embeded Subtitle Selection ---
+        self.ui.primary_sub_combo_box.currentIndexChanged.connect(
+            lambda: self.select_embedded_subtitle(PRIMARY_SUBTITLE)
+        )
+        self.ui.secondary_sub_combo_box.currentIndexChanged.connect(
+            lambda: self.select_embedded_subtitle(SECONDARY_SUBTITLE)
         )
 
         # Output
         self.player.setVideoOutput(self.ui.video_area)
-        self.player.setSource(QUrl.fromLocalFile(video_url))
+        self.player.setSource(QUrl.fromLocalFile(self.video_url))
+        self.load_embedded_subtitle_info()
 
     @Slot(int)
     def seek(self,mseconds):
@@ -130,14 +143,14 @@ class VideoPlayer:
         """ Assign subtitle block """
         if data:
             # Primary 
-            if track == 1:
+            if track == PRIMARY_SUBTITLE:
                 self.primary_subtitle.blocks = data
                 self.primary_subtitle.name = fileName
                 self.ui.primary_subtitle_name.setText(self.primary_subtitle.name)
                 self.primary_subtitle.offset_ms = 0
                 self.update_offset_subtitle(self.primary_subtitle,self.ui.primary_offset_value_label,0)
             # Secondary 
-            elif track == 2 :
+            elif track == SECONDARY_SUBTITLE :
                 self.secondary_subtitle.blocks = data
                 self.secondary_subtitle.name = fileName
                 self.ui.secondary_subtitle_name.setText(self.secondary_subtitle.name)
@@ -178,7 +191,7 @@ class VideoPlayer:
 
     def remove_subtitle(self,track):
         """ Remove the subtitles from track """
-        if track == 1 :
+        if track == PRIMARY_SUBTITLE :
             self.primary_subtitle.blocks = []
             self.primary_subtitle.offset_ms = 0
             self.primary_subtitle.name = "Primary Subtitle"
@@ -186,7 +199,7 @@ class VideoPlayer:
             self.ui.primary_subtitle_name.setText("No Subtitle")
             self.ui.primary_offset_value_label.setText("+0.00s")
 
-        elif track == 2:
+        elif track == SECONDARY_SUBTITLE:
             self.secondary_subtitle.blocks = []
             self.secondary_subtitle.offset_ms = 0
             self.secondary_subtitle.name = "Secondary Subtitle"
@@ -202,4 +215,40 @@ class VideoPlayer:
         subtitle.offset_ms += value
         label.setText(f"{subtitle.offset_ms / 1000:+.2f}s")
         self.update_subtitle(self.player.position())
+
+    def load_embedded_subtitle_info(self):
+        """ Detect embedded subtitle streams and populate the subtitle selectors.  """
+
+        detector = EmbeddedSubtitleDetector(self.video_url)
+        self.embedded_subtitles = detector.get_media_info()
+
+        if not self.embedded_subtitles:
+            return
+    
+        # populate embedded_subtitle in to combobox
+        for embed_sub in self.embedded_subtitles:
+            self.ui.primary_sub_combo_box.addItem(embed_sub.display_name(),embed_sub)
+            self.ui.secondary_sub_combo_box.addItem(embed_sub.display_name(),embed_sub)
+
+    def select_embedded_subtitle(self,track):
+        """Get the selected embedded subtitle stream for the specified subtitle track."""
+        subtitle_blocks = []
+        
+        if track == PRIMARY_SUBTITLE:
+            selected_stream = self.ui.primary_sub_combo_box.currentData()
+                  
+        elif track == SECONDARY_SUBTITLE:
+            selected_stream = self.ui.secondary_sub_combo_box.currentData()
+        else:
+            return
+        
+        extraction = EmbeddedSubtitleExtracter(self.video_url)
+        subtitle_blocks = extraction.extract(selected_stream)
+
+        # give results to subtitle system
+        self.set_subtitle(
+            data = subtitle_blocks,
+            fileName=selected_stream.display_name(),
+            track=track
+        )
         

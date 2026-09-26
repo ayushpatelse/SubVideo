@@ -27,7 +27,7 @@ class SubtitleParser:
 
                 if line.strip() =="" :
                     if block_text  : 
-                        blocks.append(self.parse_block(block_text))
+                        blocks.append(self.__parse_block(block_text))
 
                     block_text = []
                     continue
@@ -41,7 +41,7 @@ class SubtitleParser:
             return blocks
         
 
-    def timestamp_start_end_ms(self,timeStamp:str):
+    def __timestamp_start_end_ms(self,timeStamp:str):
         """ Extracting Start & End Timestamp  """
 
         if "-->" in timeStamp:
@@ -51,8 +51,8 @@ class SubtitleParser:
             start_timestamp = datetime.strptime(start_timestamp.strip(),"%H:%M:%S,%f").time()
             end_timestamp = datetime.strptime(end_timestamp.strip(),"%H:%M:%S,%f").time()
             
-            start_ms =  self.timestamp_in_milliseconds(start_timestamp)
-            end_ms =  self.timestamp_in_milliseconds(end_timestamp)
+            start_ms =  self.__timestamp_in_milliseconds(start_timestamp)
+            end_ms =  self.__timestamp_in_milliseconds(end_timestamp)
 
             if start_ms > end_ms:
                 raise ValueError( f"start_ms{start_ms} is greater than end_ms{end_ms}")
@@ -61,17 +61,17 @@ class SubtitleParser:
         else:
             raise ValueError("<-- Timestamp invalid format -->")
 
-    def timestamp_in_milliseconds(self,value):
+    def __timestamp_in_milliseconds(self,value):
         """ Converting value into milliseconds """
         return (value.hour * 3600000) + (value.minute * 60000) + (value.second * 1000) + (value.microsecond // 1000)
 
-    def parse_block(self,data:list[str]):
+    def __parse_block(self,data:list[str]):
         """Convert a raw SRT subtitle block into a SubtitleBlock."""
 
         if len(data) < 3 :
             raise ValueError("Subtitle block is missing index, timestamp, or text") 
 
-        time_stamps =  self.timestamp_start_end_ms(data[1])
+        time_stamps =  self.__timestamp_start_end_ms(data[1])
 
         index_match = re.search(r'\d+',data[0]).group()
         

@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 import subprocess
+from pathlib import Path
 import json
+import tempfile
+from .parser import SubtitleBlock,SubtitleParser
 
 @dataclass
 class EmbeddedSubtitleStream:
@@ -9,11 +12,20 @@ class EmbeddedSubtitleStream:
     language: str | None = None
     title: str | None = None
 
+    def display_name(self):
+        if self.language and self.title:
+            return f"{self.language} — {self.title}"
+        elif self.language:
+            return self.language
+        elif self.title:
+            return self.title
+        return "Unknown subtitle"
 
+    
 class EmbeddedSubtitleDetector:
 
-    def __init__(self,filePath):
-        self.file_path = filePath 
+    def __init__(self,file_path):
+        self.file_path = file_path 
     
     def get_media_info(self) ->  list[EmbeddedSubtitleStream]:
 
@@ -33,7 +45,7 @@ class EmbeddedSubtitleDetector:
             command,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
 
         data = json.loads(result.stdout)
@@ -53,3 +65,38 @@ class EmbeddedSubtitleDetector:
         return embedded_list
             
                 
+class EmbeddedSubtitleExtracter:
+    def __init__(self,video_url):
+        self.video_url = video_url
+
+    def extract(self,stream: EmbeddedSubtitleStream) -> list[SubtitleBlock]:
+
+        if stream is None:
+            return
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+
+            output_path = Path(temp_dir) / f"subtitle_{stream.index}.srt"
+
+            command = [
+                "ffmpeg",
+                "-i",
+                self.video_url,
+                "-map",
+                f"0:{stream.index}",
+                str(output_path)
+            ]
+
+            # Execute FFpeg
+            subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=True,        
+            )
+
+            extracted_subtitles =  SubtitleParser(output_path).parse()
+
+            return extracted_subtitles
+
+            

@@ -7,7 +7,8 @@ from PySide6.QtWidgets import  (
     QVBoxLayout,
     QHBoxLayout,
     QLabel,
-    QFileDialog
+    QFileDialog,
+    QComboBox
 )
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import Qt
@@ -80,9 +81,14 @@ class MainWindow(QMainWindow):
         self.primary_minus_button.setFixedWidth(50) 
         self.primary_plus_button = QPushButton("+")
         self.primary_plus_button.setFixedWidth(50) 
+        self.primary_sub_combo_box = QComboBox()
+        self.primary_sub_combo_box.addItem("Select subtitle...",None)
+        
+
         primary_function = QHBoxLayout()
 
         primary_function.addWidget(self.primary_subtitle_name,alignment=Qt.AlignmentFlag.AlignLeft)
+        primary_function.addWidget(self.primary_sub_combo_box,alignment=Qt.AlignmentFlag.AlignRight)
         primary_function.addWidget(self.primary_subtitle_change,alignment=Qt.AlignmentFlag.AlignRight)
         primary_function.addWidget(self.primary_subtitle_remove,alignment=Qt.AlignmentFlag.AlignRight)
         primary_offset_layout.addWidget(self.primary_minus_button)
@@ -107,9 +113,14 @@ class MainWindow(QMainWindow):
         self.secondary_minus_button.setFixedWidth(50) 
         self.secondary_plus_button = QPushButton("+")
         self.secondary_plus_button.setFixedWidth(50) 
+        self.secondary_sub_combo_box = QComboBox()
+        self.secondary_sub_combo_box.addItem("Select subtitle...",None)
+
+
         secondary_function = QHBoxLayout()
 
         secondary_function.addWidget(self.secondary_subtitle_name,alignment=Qt.AlignmentFlag.AlignLeft)
+        secondary_function.addWidget(self.secondary_sub_combo_box,alignment=Qt.AlignmentFlag.AlignRight)
         secondary_function.addWidget(self.secondary_subtitle_change,alignment=Qt.AlignmentFlag.AlignRight)
         secondary_function.addWidget(self.secondary_subtitle_remove,alignment=Qt.AlignmentFlag.AlignRight)
         secondary_offset_layout.addWidget(self.secondary_minus_button)
